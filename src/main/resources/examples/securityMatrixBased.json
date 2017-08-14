@@ -1,0 +1,16 @@
+{
+  "users" : [
+    {
+      "userId" : "Anonymous",
+      "permissions"   : [
+        "hudson.model.Computer.Create",
+        "hudson.model.Computer.Connect",
+        "hudson.model.Hudson.Read"
+      ]
+    },
+    {
+      "userId" : "authenticated",
+      "permissions"   : ["hudson.model.Hudson.ADMINISTER"]
+    }
+  ]
+}

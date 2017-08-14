@@ -1,23 +1,14 @@
 package org.jenkinsci.plugins.systemconfigdsl.impl.security;
 
 import com.google.auto.service.AutoService;
-import hudson.security.ACL;
-import hudson.security.AuthorizationStrategy;
-import hudson.security.FullControlOnceLoggedInAuthorizationStrategy;
 import hudson.security.HudsonPrivateSecurityRealm;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.systemconfigdsl.api.Configurator;
-import org.jenkinsci.plugins.systemconfigdsl.impl.credentials.CredentialsConfigurator;
-import org.jenkinsci.plugins.systemconfigdsl.impl.credentials.generated.UsernamePasswordCrendetialsConfig;
 import org.jenkinsci.plugins.systemconfigdsl.impl.security.generated.SecurityOwnDBConfig;
 import org.jenkinsci.plugins.systemconfigdsl.impl.security.generated.SecurityOwnDBUsers;
 
-import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -26,7 +17,7 @@ import java.util.logging.Logger;
 @AutoService(Configurator.class)
 public class SecurityConfigurator extends Configurator{
 
-    private static final Logger LOGGER = Logger.getLogger(CredentialsConfigurator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SecurityConfigurator.class.getName());
     private final String pluginName = "securityOwnDB";
     @Override
     public String getConfigFileSectionName() {

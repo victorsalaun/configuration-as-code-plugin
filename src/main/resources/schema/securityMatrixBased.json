@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType": "org.jenkinsci.plugins.systemconfigdsl.impl.security.generated.SecurityMatrixBasedConfig",
+  "javaInterfaces" : ["org.jenkinsci.plugins.systemconfigdsl.api.ConfigurationDescription"],
+  "properties": {
+    "users" : {
+      "type" : "array",
+      "items": {
+        "type": "object",
+        "javaType": "org.jenkinsci.plugins.systemconfigdsl.impl.security.generated.SecurityMatrixUsers",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "userId",
+        "permissions"
+      ]
+    }
+  }
+}

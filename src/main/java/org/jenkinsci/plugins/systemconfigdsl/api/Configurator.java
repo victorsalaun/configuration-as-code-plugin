@@ -1,8 +1,12 @@
 package org.jenkinsci.plugins.systemconfigdsl.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import hudson.model.Run;
 import org.jenkinsci.plugins.systemconfigdsl.Validator;
 import org.jenkinsci.plugins.systemconfigdsl.error.ValidationException;
+
+import java.io.IOException;
 
 public abstract class Configurator {
 
@@ -24,7 +28,11 @@ public abstract class Configurator {
     }
 
     protected ConfigurationDescription parseConfiguration(final String config, final Class<? extends ConfigurationDescription> configurationDescriptionClass) {
-        Gson gson = new Gson();
-        return gson.fromJson(config, configurationDescriptionClass);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(config, configurationDescriptionClass);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
