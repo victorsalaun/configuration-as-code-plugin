@@ -1,21 +1,17 @@
 package org.jenkinsci.plugins.casc;
 
 import hudson.Plugin;
+import hudson.PluginManager;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -25,16 +21,15 @@ public class ConfigurationAsCode extends Plugin {
 
     @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED)
     public static void configure() throws Exception {
-        final File f = new File("./jenkins.yaml");
-        if (f.exists()) {
-            configure(new FileInputStream(f));
-        }
+        final File file = getConfigFile("JENKINS_CONF");
+        configure(file);
+
     }
 
 
-    public static void configure(InputStream in) throws Exception {
+    public static void configure(File file) throws Exception {
 
-        Map<String, Object> config = new Yaml().loadAs(in, Map.class);
+        Map<String, Object> config = getConfigYaml(file, Map.class);
         for (Map.Entry<String, Object> e : config.entrySet()) {
             final Configurator configurator = Configurator.lookupRootElement(e.getKey());
             if (configurator == null) {
@@ -136,7 +131,56 @@ public class ConfigurationAsCode extends Plugin {
             if (configurator == null) continue;
             document(type.getName(), configurator.describe());
         }
-
-
     }
+
+    @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED)
+    private static void installPlugins() throws IOException {
+        // TODO get version added to the install of the plugin so we can control the specific version
+        PluginManager pluginManager = Jenkins.getInstance().pluginManager;
+        pluginManager.doCheckUpdatesServer();
+        Collection<String> plugins = getConfigYaml(getConfigFile("JENKINS_PLUGINS"), ArrayList.class);
+        pluginManager.install(plugins, true);
+    }
+
+    private static <T> T getConfigYaml(File file, Class<T> type) throws FileNotFoundException {
+
+        if (!file.exists()){
+            throw new FileNotFoundException(file.getAbsolutePath() + "Was not found, check path for errors");
+        }
+            return new Yaml().loadAs(new FileInputStream(file), type);
+    }
+
+    private static File getConfigFile(String envName) throws IOException{
+        // TODO Fix this code as this is just for the MVP and is very verbose and probably a ugly solution
+        BufferedWriter out = null;
+        String envVar = System.getenv(envName);
+        if (envVar != null){
+            if (envVar.contains("http")){
+                File file;
+                String ymlText = "";
+                URL url = new URL(envVar);
+                try(BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))){
+                    for(String line; (line = reader.readLine()) != null;){
+                        ymlText += line + "\n";
+                    }
+                    File temp = File.createTempFile("temp", ".yaml");
+                    out = new BufferedWriter(new FileWriter(temp));
+                    out.write(ymlText);
+                    file = temp;
+                    return file;
+                }catch( IOException e){
+                    System.out.println(e);
+                }finally {
+                    if (out != null){
+                        out.flush();
+                        out.close();
+                    }
+                }
+
+            }
+            return new File(envVar);
+        }
+        throw new FileNotFoundException("[ERROR] " + envName +  " variable is not set or the URL/URi is wrong. Can't complete setup");
+    }
+
 }
