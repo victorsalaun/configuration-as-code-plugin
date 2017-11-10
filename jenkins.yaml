@@ -1,16 +1,17 @@
 jenkins:
-  # securityRealm: local
-  securityRealm:
-    ldap:
-      configurations:
-        - server: ldap.acme.com
-          rootDN: dc=acme,dc=fr
-          managerPasswordSecret: ${LDAP_PASSWORD}
-      cache:
-        size: 100
-        ttl: 10
-      userIdStrategy: CaseSensitive
-      groupIdStrategy: CaseSensitive
+  #
+  securityRealm: local
+  #securityRealm:
+  #  ldap:
+  #    configurations:
+  #      - server: ldap.acme.com
+  #        rootDN: dc=acme,dc=fr
+  #        managerPasswordSecret: ${LDAP_PASSWORD}
+  #    cache:
+  #      size: 100
+  #      ttl: 10
+  #    userIdStrategy: CaseSensitive
+  #    groupIdStrategy: CaseSensitive
 
   authorizationStrategy:
     loggedInUsersCanDoAnything:

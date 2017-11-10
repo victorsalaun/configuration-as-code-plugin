@@ -7,6 +7,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import java.io.File;
+
 import static org.junit.Assert.*;
 
 /**
@@ -19,7 +21,7 @@ public class JenkinsConfiguratorTest {
 
     @Test
     public void jenkins_primitive_attributes() throws Exception {
-        ConfigurationAsCode.configure(getClass().getResourceAsStream("Primitives.yml"));
+        ConfigurationAsCode.configure(new File("Primitives.yml"));
 
         final Jenkins jenkins = Jenkins.getInstance();
         assertEquals(6666, jenkins.getSlaveAgentPort());
@@ -28,7 +30,7 @@ public class JenkinsConfiguratorTest {
 
     @Test
     public void jenkins_abstract_describable_attributes() throws Exception {
-        ConfigurationAsCode.configure(getClass().getResourceAsStream("HeteroDescribable.yml"));
+        ConfigurationAsCode.configure(new File("HeteroDescribable.yml"));
 
         final Jenkins jenkins = Jenkins.getInstance();
         assertTrue(jenkins.getSecurityRealm() instanceof HudsonPrivateSecurityRealm);

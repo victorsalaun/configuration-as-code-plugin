@@ -134,12 +134,13 @@ public class ConfigurationAsCode extends Plugin {
     }
 
     @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED)
-    private static void installPlugins() throws IOException {
+    public static void installPlugins() throws IOException {
         // TODO get version added to the install of the plugin so we can control the specific version
         PluginManager pluginManager = Jenkins.getInstance().pluginManager;
         pluginManager.doCheckUpdatesServer();
         Collection<String> plugins = getConfigYaml(getConfigFile("JENKINS_PLUGINS"), ArrayList.class);
-        pluginManager.install(plugins, true);
+        pluginManager.install(plugins, false);
+
     }
 
     private static <T> T getConfigYaml(File file, Class<T> type) throws FileNotFoundException {
@@ -150,7 +151,7 @@ public class ConfigurationAsCode extends Plugin {
             return new Yaml().loadAs(new FileInputStream(file), type);
     }
 
-    private static File getConfigFile(String envName) throws IOException{
+     private static File getConfigFile(String envName) throws IOException{
         // TODO Fix this code as this is just for the MVP and is very verbose and probably a ugly solution
         BufferedWriter out = null;
         String envVar = System.getenv(envName);
