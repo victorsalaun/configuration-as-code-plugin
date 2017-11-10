@@ -4,6 +4,7 @@ import hudson.Plugin;
 import hudson.PluginManager;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
+import hudson.lifecycle.RestartNotSupportedException;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 import org.yaml.snakeyaml.Yaml;
@@ -134,7 +135,7 @@ public class ConfigurationAsCode extends Plugin {
     }
 
     @Initializer(after = InitMilestone.JOB_LOADED)
-    public static void installPlugins() throws IOException {
+    public static void installPlugins() throws IOException, RestartNotSupportedException {
         // TODO get version added to the install of the plugin so we can control the specific version
         ArrayList<String> p = new ArrayList<>();
         PluginManager pluginManager = Jenkins.getInstance().pluginManager;
@@ -145,9 +146,9 @@ public class ConfigurationAsCode extends Plugin {
                 p.add(sn);
             }
         }
-
-        pluginManager.install(p, false);
-
+        if (!p.isEmpty()) {
+            pluginManager.install(p, false);
+        }
     }
 
     private static <T> T getConfigYaml(File file, Class<T> type) throws FileNotFoundException {
