@@ -1,5 +1,6 @@
 target/
 work/
+jenkins_home/
 .idea/
 *.iml
 .classpath

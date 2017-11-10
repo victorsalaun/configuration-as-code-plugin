@@ -1,0 +1,25 @@
+version: "2"
+
+services:
+  jmaster:
+    image: jcasc:latest
+    build:
+      context: .
+      args:
+        - JAVA_OPTS
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size:  "200m"
+        max-file: "3"
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - $HOME/.ssh:/var/jenkins_home/.ssh
+      - ./jenkins_home:/var/jenkins_home
+      - /etc/localtime:/etc/localtime
+    environment:
+      - JENKINS_CONF=${JENKINS_CONF}
+      - JENKINS_PLUGINS=${JENKINS_PLUGINS}
