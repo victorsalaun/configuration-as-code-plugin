@@ -133,13 +133,20 @@ public class ConfigurationAsCode extends Plugin {
         }
     }
 
-    @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED)
+    @Initializer(after = InitMilestone.JOB_LOADED)
     public static void installPlugins() throws IOException {
         // TODO get version added to the install of the plugin so we can control the specific version
+        ArrayList<String> p = new ArrayList<>();
         PluginManager pluginManager = Jenkins.getInstance().pluginManager;
         pluginManager.doCheckUpdatesServer();
         Collection<String> plugins = getConfigYaml(getConfigFile("JENKINS_PLUGINS"), ArrayList.class);
-        pluginManager.install(plugins, false);
+        for (String sn : plugins){
+            if (pluginManager.getPlugin(sn) == null){
+                p.add(sn);
+            }
+        }
+
+        pluginManager.install(p, false);
 
     }
 
