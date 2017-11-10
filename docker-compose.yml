@@ -2,7 +2,7 @@ version: "2"
 
 services:
   jmaster:
-    image: jcasc:latest
+    image: praqma/docker4jcasc:latest
     build:
       context: .
       args:
