@@ -32,6 +32,18 @@ public class ConfigurationAsCode extends Plugin {
         final List<InputStream> is = getConfigurationInput(configParameter);
         for(InputStream isToConfigure : is) {
             if (isToConfigure != null) {
+
+                System.out.println(
+                        " \n" +
+                        "   _____             __ _                       _   _                            _____          _      \n" +
+                        "  / ____|           / _(_)                     | | (_)                          / ____|        | |     \n" +
+                        " | |     ___  _ __ | |_ _  __ _ _   _ _ __ __ _| |_ _  ___  _ __     __ _ ___  | |     ___   __| | ___ \n" +
+                        " | |    / _ \\| '_ \\|  _| |/ _` | | | | '__/ _` | __| |/ _ \\| '_ \\   / _` / __| | |    / _ \\ / _` |/ _ \\\n" +
+                        " | |___| (_) | | | | | | | (_| | |_| | | | (_| | |_| | (_) | | | | | (_| \\__ \\ | |___| (_) | (_| |  __/\n" +
+                        "  \\_____\\___/|_| |_|_| |_|\\__, |\\__,_|_|  \\__,_|\\__|_|\\___/|_| |_|  \\__,_|___/  \\_____\\___/ \\__,_|\\___|\n" +
+                        "                           __/ |                                                                       \n" +
+                        "                          |___/  \n" +
+                        " \n");
                 configure(isToConfigure);
             }
         }

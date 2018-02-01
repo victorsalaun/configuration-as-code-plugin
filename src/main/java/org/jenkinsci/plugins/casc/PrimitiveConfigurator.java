@@ -36,7 +36,9 @@ public class PrimitiveConfigurator extends Configurator {
                 for (SecretSource secretSource : SecretSource.all()) {
                     reveal = secretSource.reveal(r.get());
                     if(reveal.isPresent()) {
-                        config = reveal.get();
+                        String s = reveal.get();
+                        System.out.println(config + " resolved as '" + s + "' by " + secretSource.getClass().getSimpleName());
+                        config = s;
                         break;
                     }
                 }
