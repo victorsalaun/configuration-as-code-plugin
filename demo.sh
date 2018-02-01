@@ -13,4 +13,4 @@ mkdir -p secrets
 echo -n "123" > secrets/ADMIN_PASSWORD
 
 # We mimic docker (swarm) secrets
-docker run --rm -p 8080:8080 -v $(pwd)/secrets:/run/secrets:ro demo
+docker run --rm -p 8080:8080 -v $(pwd)/secrets:/run/secrets:ro -v /var/run/docker.sock:/var/run/docker.sock demo
