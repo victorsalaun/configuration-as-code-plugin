@@ -33,7 +33,7 @@ public class ConfigurationAsCode extends Plugin {
         for(InputStream isToConfigure : is) {
             if (isToConfigure != null) {
 
-                System.out.println(
+                System.err.println(
                         " \n" +
                         "   _____             __ _                       _   _                            _____          _      \n" +
                         "  / ____|           / _(_)                     | | (_)                          / ____|        | |     \n" +

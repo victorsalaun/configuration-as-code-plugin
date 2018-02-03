@@ -84,7 +84,7 @@ public class Attribute<T> {
      * Default Setter implementation based on JavaBean property write method.
      */
     private static final Setter DEFAULT_SETTER = (target, attribute, value) -> {
-        logger.info("Setting "+target.getClass().getCanonicalName()+'#'+attribute.name+" = " + value);
+        System.err.println("Setting "+target.getClass().getCanonicalName()+'#'+attribute.name+" = " + value);
         final PropertyDescriptor property = PropertyUtils.getPropertyDescriptor(target, attribute.name);
         final Method writeMethod = property.getWriteMethod();
 
