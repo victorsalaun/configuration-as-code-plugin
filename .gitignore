@@ -2,8 +2,6 @@ target/
 work/
 .idea/
 *.iml
-# ignore jenkins.yaml from demos folder
-demos/**/jenkins.yaml
 # ignore jenkins.yaml from root folder (used by many for testing)
 /jenkins.yaml
 
