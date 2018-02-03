@@ -1,0 +1,46 @@
+jenkins:
+  systemMessage: "Jenkins configured automatically by Jenkins Configuration as Code Plugin\n\n"
+  numExecutors: 0
+  scmCheckoutRetryCount: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "${ADMIN_PASSWORD}"
+  authorizationStrategy: loggedInUsersCanDoAnything
+  agentProtocols:
+    - JNLP4-connect
+
+  jobs:
+      - >
+          multibranchPipelineJob('configuration-as-code') {
+              branchSources {
+                  git {
+                      remote('https://github.com/jenkinsci/configuration-as-code-plugin.git')
+                  }
+              }
+              triggers {
+                  periodic(5)
+              }
+          }
+
+  clouds:
+    - docker:
+        name: "docker"
+        dockerHost:
+          uri: "unix:///var/run/docker.sock"
+        templates:
+          - labelString: "docker-agent"
+            dockerTemplateBase:
+              image: "jenkins/slave"
+            remoteFs: "/home/jenkins/agent"
+            connector:
+              attach:
+                user: "jenkins"
+            instanceCapStr: "10"
+  
+
+
+
+
