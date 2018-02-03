@@ -6,6 +6,10 @@ RUN echo $JENKINS_VERSION > /usr/share/jenkins/ref/jenkins.install.InstallUtil.l
 ENV CASC_JENKINS_CONFIG=/usr/share/jenkins/ref/jenkins.yaml
 
 # Derived image can just provide jenkins.yaml file in context, will be automatically included
-ONBUILD COPY --chown=jenkins plugins.txt /usr/share/jenkins/ref/plugins.txt
-ONBUILD RUN install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
+
+# Run offline
+# ONBUILD COPY --chown=jenkins plugins.txt /usr/share/jenkins/ref/plugins.txt
+# ONBUILD RUN install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
+ONBUILD COPY --chown=jenkins plugins/ /usr/share/jenkins/ref/plugins
+
 ONBUILD COPY --chown=jenkins jenkins.yaml /usr/share/jenkins/ref/jenkins.yaml
