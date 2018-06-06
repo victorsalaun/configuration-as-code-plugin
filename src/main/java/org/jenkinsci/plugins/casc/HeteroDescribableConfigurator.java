@@ -125,7 +125,7 @@ public class HeteroDescribableConfigurator extends Configurator<Describable> {
             } else {
                 for (String symbol : symbols) {
                     if (symbol.equalsIgnoreCase(shortname)) {
-                        LOGGER.warning(node.source() + ": '"+shortname+"' is obsolete, please use '" + preferred + "'");
+                        ObsoleteConfigurationMonitor.get().record(node, "'"+shortname+"' is obsolete, please use '" + preferred + "'");
                         return d.getKlass().toJavaClass();
                     }
                 }

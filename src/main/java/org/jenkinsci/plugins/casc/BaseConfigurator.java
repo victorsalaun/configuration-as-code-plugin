@@ -183,7 +183,7 @@ public abstract class BaseConfigurator<T> extends Configurator<T> {
                 for (String alias : attribute.aliases) {
                     sub = removeIgnoreCase(config, alias);
                     if (sub != null) {
-                        LOGGER.warning(sub.source() + ": '"+alias+"' is an obsolete attribute name, please use '" + name + "'");
+                        ObsoleteConfigurationMonitor.get().record(sub, "'"+alias+"' is an obsolete attribute name, please use '" + name + "'");
                         break;
                     }
                 }
