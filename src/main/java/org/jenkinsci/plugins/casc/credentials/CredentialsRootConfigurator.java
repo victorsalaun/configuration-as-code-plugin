@@ -62,6 +62,13 @@ public class CredentialsRootConfigurator extends BaseConfigurator<GlobalCredenti
     }
 
     @Override
+    public GlobalCredentialsConfiguration test(CNode config) throws ConfiguratorException {
+        final GlobalCredentialsConfiguration target = getTargetComponent();
+        configure(config.asMapping(), target);
+        return target;
+    }
+
+    @Override
     public Set<Attribute> describe() {
         return Collections.singleton(new Attribute<Jenkins, SystemCredentialsProvider>("system", SystemCredentialsProvider.class)
             .getter( t -> SystemCredentialsProvider.getInstance() )

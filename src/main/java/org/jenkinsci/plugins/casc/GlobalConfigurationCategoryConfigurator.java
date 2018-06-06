@@ -53,6 +53,12 @@ public class GlobalConfigurationCategoryConfigurator extends BaseConfigurator<Gl
     }
 
     @Override
+    public GlobalConfigurationCategory test(CNode config) throws ConfiguratorException {
+        test(config.asMapping(), category);
+        return category;
+    }
+
+    @Override
     public Set<Attribute> describe() {
 
         Set<Attribute> attributes = new HashSet<>();

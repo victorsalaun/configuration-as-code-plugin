@@ -64,6 +64,8 @@ public interface ElementConfigurator<T> {
     @Nonnull
     T configure(CNode config) throws ConfiguratorException;
 
+    @Nonnull
+    T test(CNode config) throws ConfiguratorException;
 
     /**
      * Describe a component as a Configuration Nodes {@link CNode} to be exported as yaml.

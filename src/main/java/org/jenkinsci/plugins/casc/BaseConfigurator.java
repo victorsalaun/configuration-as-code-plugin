@@ -219,6 +219,52 @@ public abstract class BaseConfigurator<T> extends Configurator<T> {
         }
     }
 
+    protected void test(Mapping config, T instance) throws ConfiguratorException {
+        final Set<Attribute> attributes = describe();
+
+        for (Attribute<T,Object> attribute : attributes) {
+            final String name = attribute.getName();
+            CNode sub = removeIgnoreCase(config, name);
+            if (sub == null) {
+                for (String alias : attribute.aliases) {
+                    sub = removeIgnoreCase(config, alias);
+                    if (sub != null) {
+                        LOGGER.warning(sub.source() + ": '"+alias+"' is an obsolete attribute name, please use '" + name + "'");
+                        break;
+                    }
+                }
+            }
+
+            if (sub != null) {
+                final Class k = attribute.getType();
+                final Configurator configurator = Configurator.lookupOrFail(k);
+
+                final Object valueToSet;
+                if (attribute.isMultiple()) {
+                    List<Object> values = new ArrayList<>();
+                    for (CNode o : sub.asSequence()) {
+                        Object value = configurator.test(o);
+                        values.add(value);
+                    }
+                    valueToSet= values;
+                } else {
+                    valueToSet = configurator.test(sub);
+                }
+
+//                try {
+//                    LOGGER.info("Setting " + instance + '.' + name + " = " + (sub.isSensitiveData() ? "****" : valueToSet));
+//                    attribute.setValue(instance, valueToSet);
+//                } catch (Exception ex) {
+//                    throw new ConfiguratorException(configurator, "Failed to set attribute " + attribute, ex);
+//                }
+            }
+        }
+        if (!config.isEmpty()) {
+            final String invalid = StringUtils.join(config.keySet(), ',');
+            throw new ConfiguratorException("Invalid configuration elements for type " + instance.getClass() + " : " + invalid);
+        }
+    }
+
     protected Mapping compare(T o1, T o2) throws Exception {
 
         Mapping mapping = new Mapping();

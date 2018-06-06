@@ -28,6 +28,12 @@ public class UpdateSiteConfigurator extends BaseConfigurator<UpdateSite> {
         return new UpdateSite(map.getScalarValue("id"), map.getScalarValue("url"));
     }
 
+    @Override
+    public UpdateSite test(CNode config) throws ConfiguratorException {
+        Mapping map = config.asMapping();
+        return new UpdateSite(map.getScalarValue("id"), map.getScalarValue("url"));
+    }
+
     @CheckForNull
     @Override
     public CNode describe(UpdateSite instance) throws Exception {

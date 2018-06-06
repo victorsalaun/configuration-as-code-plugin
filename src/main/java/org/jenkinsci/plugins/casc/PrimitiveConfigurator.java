@@ -34,6 +34,11 @@ public class PrimitiveConfigurator extends Configurator {
         return Stapler.lookupConverter(target).convert(target, config);
     }
 
+    @Override
+    public Object test(CNode config) throws ConfiguratorException {
+        return Stapler.lookupConverter(target).convert(target, config);
+    }
+
     @CheckForNull
     @Override
     public CNode describe(Object instance) {

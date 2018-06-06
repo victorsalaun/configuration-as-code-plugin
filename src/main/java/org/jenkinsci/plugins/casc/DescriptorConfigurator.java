@@ -53,6 +53,12 @@ public class DescriptorConfigurator extends BaseConfigurator<Descriptor> impleme
         return descriptor;
     }
 
+    @Override
+    public Descriptor test(CNode config) throws ConfiguratorException {
+        configure(config.asMapping(), descriptor);
+        return descriptor;
+    }
+
     @CheckForNull
     @Override
     public CNode describe(Descriptor instance) throws Exception {

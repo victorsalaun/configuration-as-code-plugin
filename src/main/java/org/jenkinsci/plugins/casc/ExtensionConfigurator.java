@@ -63,6 +63,38 @@ public class ExtensionConfigurator<T> extends BaseConfigurator<T> {
         return o;
     }
 
+    @Override
+    public T test(CNode c) throws ConfiguratorException {
+        final ExtensionList<T> list = Jenkins.getInstance().getExtensionList(target);
+        if (list.size() != 1) {
+            throw new IllegalStateException();
+        }
+        final T o = list.get(0);
+
+        if (c instanceof Map) {
+            Mapping config = c.asMapping();
+            final Set<Attribute> attributes = describe();
+            for (Attribute attribute : attributes) {
+                final String name = attribute.getName();
+                if (config.containsKey(name)) {
+                    final Class k = attribute.getType();
+                    final Configurator configurator = Configurator.lookup(k);
+                    if (configurator == null) throw new IllegalStateException("No configurator implementation to manage "+ k);
+                    final CNode yaml = config.get(name);
+                    final Object value = configurator.test(yaml);
+                    try {
+                        logger.info("Setting " + o + '.' + name + " = " + (yaml.isSensitiveData() ? "****" : value));
+                        attribute.setValue(o, value);
+                    } catch (Exception e) {
+                        throw new ConfiguratorException(this, "Failed to set attribute " + attribute, e);
+                    }
+                }
+            }
+        }
+
+        return o;
+    }
+
     @CheckForNull
     @Override
     public CNode describe(T instance) throws Exception {

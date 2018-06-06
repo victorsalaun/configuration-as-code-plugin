@@ -58,6 +58,28 @@ public class ProjectMatrixAuthorizationStrategyConfigurator extends Configurator
     }
 
     @Override
+    public ProjectMatrixAuthorizationStrategy test(CNode config) throws ConfiguratorException {
+        Mapping map = config.asMapping();
+        Sequence o = map.get("grantedPermissions").asSequence();
+        Configurator<GroupPermissionDefinition> permissionConfigurator = Configurator.lookupOrFail(GroupPermissionDefinition.class);
+        Map<Permission,Set<String>> grantedPermissions = new HashMap<>();
+        for(CNode entry : o) {
+            GroupPermissionDefinition gpd = permissionConfigurator.test(entry);
+            //We transform the linear list to a matrix (Where permission is the key instead)
+            gpd.grantPermission(grantedPermissions);
+        }
+
+        ProjectMatrixAuthorizationStrategy gms = new ProjectMatrixAuthorizationStrategy();
+        for(Map.Entry<Permission,Set<String>> permission : grantedPermissions.entrySet()) {
+            for(String sid : permission.getValue()) {
+                gms.add(permission.getKey(), sid);
+            }
+        }
+
+        return gms;
+    }
+
+    @Override
     @SuppressFBWarnings(value = "DM_NEW_FOR_GETCLASS", justification = "We need a fully qualified type to do proper attribute binding")
     public Set<Attribute> describe() {
         return Collections.singleton(new Attribute<ProjectMatrixAuthorizationStrategy, GroupPermissionDefinition>("grantedPermissions", new HashSet<GroupPermissionDefinition>().getClass()));

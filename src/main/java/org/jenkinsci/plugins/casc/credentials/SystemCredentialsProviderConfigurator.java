@@ -36,6 +36,14 @@ public class SystemCredentialsProviderConfigurator extends BaseConfigurator<Syst
 
     @Nonnull
     @Override
+    public SystemCredentialsProvider test(CNode config) throws ConfiguratorException {
+        final SystemCredentialsProvider instance = SystemCredentialsProvider.getInstance();
+        configure(config.asMapping(), instance);
+        return instance;
+    }
+
+    @Nonnull
+    @Override
     public Set<Attribute> describe() {
         return Collections.singleton(
             new MultivaluedAttribute<SystemCredentialsProvider, DomainCredentials>("domainCredentials", DomainCredentials.class)

@@ -460,4 +460,134 @@ public class ConfigurationAsCode extends ManagementLink {
                     listElements(elements, configurator.describe());
                 });
     }
+
+    @RequirePOST
+    public void doLint(StaplerRequest request, StaplerResponse response) throws Exception {
+        if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        lint();
+        response.sendRedirect("");
+    }
+
+    public void lint() throws Exception {
+        List<String> configParameters = getBundledCasCURIs();
+        if (!configParameters.isEmpty()) {
+            LOGGER.log(Level.FINE, "Located bundled config YAMLs: {0}", configParameters);
+        }
+
+        String configParameter = System.getProperty(
+                CASC_JENKINS_CONFIG_PROPERTY,
+                System.getenv(CASC_JENKINS_CONFIG_ENV)
+        );
+        if (configParameter == null) {
+            if (Files.exists(Paths.get(DEFAULT_JENKINS_YAML_PATH))) {
+                configParameter = DEFAULT_JENKINS_YAML_PATH;
+            }
+        }
+
+        if (configParameter != null) {
+            // Add external config parameter
+            configParameters.add(configParameter);
+        }
+        if (configParameters.isEmpty()) {
+            LOGGER.log(Level.FINE, "No configuration set nor default config file");
+            return;
+        }
+        lint(configParameters);
+    }
+
+    public void lint(Collection<String> configParameters) throws Exception {
+
+        List<YamlSource> configs = new ArrayList<>();
+
+        for (String p : configParameters) {
+            if (isSupportedURI(p)) {
+                configs.add(new YamlSource<>(p, READ_FROM_URL));
+            } else {
+                configs.addAll(configs(p).stream()
+                        .map(s -> new YamlSource<>(s, READ_FROM_PATH))
+                        .collect(toList()));
+            }
+            sources = Collections.singletonList(p);
+        }
+        lintWith(configs);
+        lastTimeLoaded = System.currentTimeMillis();
+    }
+
+    private void lintWith(List<YamlSource> configs) throws Exception {
+        final Node merged = YamlUtils.merge(configs);
+        final Mapping map = loadAs(merged);
+        lintWith(map.entrySet());
+    }
+
+    private static void lintWith(Set<Map.Entry<String, CNode>> entries) throws Exception {
+
+        // Run configurators by order, consuming entries until all have found a matching configurator
+        // configurators order is important so that org.jenkinsci.plugins.casc.plugins.PluginManagerConfigurator run
+        // before any other, and can install plugins required by other configuration to successfully parse yaml data
+        /*for (RootElementConfigurator configurator : RootElementConfigurator.all()) {
+            final CNode config = configurator.describe(configurator.getTargetComponent());
+            final Iterator<Map.Entry<String, CNode>> it = entries.iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, CNode> entry = it.next();
+                if (!entry.getKey().equalsIgnoreCase(configurator.getName())) {
+                    continue;
+                }
+                System.out.println("name: " + configurator.getName());
+                //configurator.configure(entry.getValue());
+                Mapping yamlMapping = entry.getValue().asMapping();
+                Set<String> yamlKeys = yamlMapping.keySet();
+
+                Mapping currentMapping = config != null ? config.asMapping() : new Mapping();
+                Set<String> currentKeys = currentMapping.keySet();
+
+                for (String key : yamlKeys) {
+                    if (!currentKeys.contains(key)) {
+                        throw new ConfiguratorException("Invalid configuration elements for type " + configurator.getClass() + " : " + key);
+                    }
+                }
+
+                it.remove();
+                break;
+            }
+        }
+
+        if (!entries.isEmpty()) {
+            final Map.Entry<String, CNode> next = entries.iterator().next();
+            throw new ConfiguratorException(format("No configurator for root element <%s>", next.getKey()));
+        }*/
+
+        // Run configurators by order, consuming entries until all have found a matching configurator
+        // configurators order is important so that org.jenkinsci.plugins.casc.plugins.PluginManagerConfigurator run
+        // before any other, and can install plugins required by other configuration to successfully parse yaml data
+        for (RootElementConfigurator configurator : RootElementConfigurator.all()) {
+            final Iterator<Map.Entry<String, CNode>> it = entries.iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, CNode> entry = it.next();
+                if (! entry.getKey().equalsIgnoreCase(configurator.getName())) {
+                    continue;
+                }
+                try {
+                    configurator.test(entry.getValue());
+                    it.remove();
+                    break;
+                } catch (ConfiguratorException e) {
+                    throw new ConfiguratorException(
+                            configurator,
+                            format("error configuring <%s> with <%s> configurator", entry.getKey(), configurator.getName()), e
+                    );
+                }
+            }
+        }
+
+        if (!entries.isEmpty()) {
+            final Map.Entry<String, CNode> next = entries.iterator().next();
+            throw new ConfiguratorException(format("No configurator for root element <%s>", next.getKey()));
+        }
+
+    }
+
 }

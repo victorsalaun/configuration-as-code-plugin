@@ -65,6 +65,27 @@ public class RoleBasedAuthorizationStrategyConfigurator extends Configurator<Rol
         return new RoleBasedAuthorizationStrategy(grantedRoles);
     }
 
+    @Override
+    public RoleBasedAuthorizationStrategy test(CNode config) throws ConfiguratorException {
+        //TODO: API should return a qualified type
+        final Configurator<RoleDefinition> roleDefinitionConfigurator =
+                (Configurator<RoleDefinition>) Configurator.lookupOrFail(RoleDefinition.class);
+
+        Mapping map = config.asMapping();
+        Map<String, RoleMap> grantedRoles = new HashMap<>();
+
+        CNode rolesConfig = map.get("roles");
+        if (rolesConfig != null) {
+            grantedRoles.put(RoleBasedAuthorizationStrategy.GLOBAL,
+                    retrieveRoleMap(rolesConfig, "global", roleDefinitionConfigurator));
+            grantedRoles.put(RoleBasedAuthorizationStrategy.PROJECT,
+                    retrieveRoleMap(rolesConfig, "items", roleDefinitionConfigurator));
+            grantedRoles.put(RoleBasedAuthorizationStrategy.SLAVE,
+                    retrieveRoleMap(rolesConfig, "agents", roleDefinitionConfigurator));
+        }
+        return new RoleBasedAuthorizationStrategy(grantedRoles);
+    }
+
     @Nonnull
     private static RoleMap retrieveRoleMap(@Nonnull CNode config, @Nonnull String name, Configurator<RoleDefinition> configurator) throws ConfiguratorException {
         Mapping map = config.asMapping();

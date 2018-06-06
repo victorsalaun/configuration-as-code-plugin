@@ -67,6 +67,29 @@ public class GlobalMatrixAuthorizationStrategyConfigurator extends Configurator<
         return gms;
     }
 
+    @Override
+    public GlobalMatrixAuthorizationStrategy test(CNode config) throws ConfiguratorException {
+        Mapping map = config.asMapping();
+        Configurator<GroupPermissionDefinition> permissionConfigurator = Configurator.lookupOrFail(GroupPermissionDefinition.class);
+        Map<Permission,Set<String>> grantedPermissions = new HashMap<>();
+        for (CNode entry : map.get("grantedPermissions").asSequence()) {
+            GroupPermissionDefinition gpd = permissionConfigurator.test(entry);
+            //We transform the linear list to a matrix (Where permission is the key instead)
+            gpd.grantPermission(grantedPermissions);
+        }
+
+        //TODO: Once change is in place for GlobalMatrixAuthentication. Switch away from reflection
+        GlobalMatrixAuthorizationStrategy gms = new GlobalMatrixAuthorizationStrategy();
+        try {
+            Field f = gms.getClass().getDeclaredField("grantedPermissions");
+            f.setAccessible(true);
+            f.set(gms, grantedPermissions);
+        } catch (NoSuchFieldException | IllegalAccessException ex) {
+            throw new ConfiguratorException(this, "Cannot set GlobalMatrixAuthorizationStrategy#grantedPermissions via reflection", ex);
+        }
+        return gms;
+    }
+
     @CheckForNull
     @Override
     public CNode describe(GlobalMatrixAuthorizationStrategy instance) {

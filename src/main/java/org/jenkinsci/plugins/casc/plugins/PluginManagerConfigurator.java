@@ -234,6 +234,53 @@ public class PluginManagerConfigurator extends BaseConfigurator<PluginManager> i
     }
 
     @Override
+    public PluginManager test(CNode config) throws ConfiguratorException {
+        Mapping map = config.asMapping();
+        final Jenkins jenkins = Jenkins.getInstance();
+
+        final CNode proxy = map.get("proxy");
+        if (proxy != null) {
+            Configurator<ProxyConfiguration> pc = Configurator.lookup(ProxyConfiguration.class);
+            if (pc == null) throw new ConfiguratorException("ProxyConfiguration not well registered");
+            ProxyConfiguration pcc = pc.test(proxy);
+            jenkins.proxy = pcc;
+        }
+
+        final CNode sites = map.get("sites");
+        final UpdateCenter updateCenter = jenkins.getUpdateCenter();
+        if (sites != null) {
+            Configurator<UpdateSite> usc = Configurator.lookup(UpdateSite.class);
+            List<UpdateSite> updateSites = new ArrayList<>();
+            for (CNode data : sites.asSequence()) {
+                UpdateSite in = usc.test(data);
+                if (in.isDue()) {
+                    in.updateDirectly(DownloadService.signatureCheck);
+                }
+                updateSites.add(in);
+            }
+
+            try {
+                updateCenter.getSites().replaceBy(updateSites);
+            } catch (IOException e) {
+                throw new ConfiguratorException("failed to reconfigure updateCenter.sites", e);
+            }
+        }
+
+
+        Queue<PluginToInstall> plugins = new LinkedList<>();
+        final CNode required = map.get("required");
+        if (required != null) {
+            for (Map.Entry<String, CNode> entry : required.asMapping().entrySet()) {
+                plugins.add(new PluginToInstall(entry.getKey(), entry.getValue().asScalar().getValue()));
+            }
+        }
+
+        final PluginManager pluginManager = getTargetComponent();
+
+        return pluginManager;
+    }
+
+    @Override
     public String getName() {
         return "plugins";
     }

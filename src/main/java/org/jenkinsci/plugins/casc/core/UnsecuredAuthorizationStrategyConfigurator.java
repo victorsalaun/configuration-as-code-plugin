@@ -26,6 +26,11 @@ public class UnsecuredAuthorizationStrategyConfigurator extends BaseConfigurator
         return (Unsecured)AuthorizationStrategy.UNSECURED;
     }
 
+    @Override
+    public Unsecured test(CNode config) throws ConfiguratorException {
+        return (Unsecured)AuthorizationStrategy.UNSECURED;
+    }
+
     @CheckForNull
     @Override
     public CNode describe(Unsecured instance) {

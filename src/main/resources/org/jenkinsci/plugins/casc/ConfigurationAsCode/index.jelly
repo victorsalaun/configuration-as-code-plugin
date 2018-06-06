@@ -30,7 +30,11 @@
       </j:otherwise>
         <f:form method="post" action="export" name="export">
           <f:submit name="export" value="Export Configuration"/>
-        </f:form>        
+        </f:form>
+
+      <f:form method="post" action="lint" name="lint">
+        <f:submit name="lint" value="lint Configuration"/>
+      </f:form>
     </j:choose>
 
 

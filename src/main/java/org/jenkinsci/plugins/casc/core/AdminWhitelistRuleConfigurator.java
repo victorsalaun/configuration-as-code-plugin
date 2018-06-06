@@ -64,6 +64,14 @@ public class AdminWhitelistRuleConfigurator extends BaseConfigurator<AdminWhitel
     }
 
     @Override
+    public AdminWhitelistRule test(CNode config) throws ConfiguratorException {
+        Injector injector = Jenkins.getInstance().getInjector();
+        AdminWhitelistRule instance = injector.getInstance(AdminWhitelistRule.class);
+        test(config.asMapping(), instance);
+        return instance;
+    }
+
+    @Override
     public Set<Attribute> describe() {
         return new HashSet<>(Arrays.asList(
                 new Attribute<AdminWhitelistRule, Boolean>("enabled", Boolean.class)
