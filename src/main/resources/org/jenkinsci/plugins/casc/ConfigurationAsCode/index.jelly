@@ -38,6 +38,7 @@
     <dt>
       <dl><a href="reference">Documentation</a></dl>
       <dl><a href="schema">JSON schema</a></dl>
+      <dl><a href="linter">Lint your jenkins.yaml</a></dl>
     </dt>
 
   </div>
