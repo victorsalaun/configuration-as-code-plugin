@@ -96,21 +96,21 @@ public class HeteroDescribableConfigurator extends Configurator<Describable> {
             case MAPPING:
                 Mapping map = config.asMapping();
                 if (map.size() != 1) {
-                    throw new IllegalArgumentException("single entry map expected to configure a "+target.getName());
+                    throw new IllegalArgumentException("single entry map expected to configure a " + target.getName());
                 }
                 final Map.Entry<String, CNode> next = map.entrySet().iterator().next();
                 shortname = next.getKey();
                 subconfig = next.getValue();
                 break;
             default:
-                throw new IllegalArgumentException("Unexpected configuration type "+config);
+                throw new IllegalArgumentException("Unexpected configuration type " + config);
         }
 
         final List<Descriptor> candidates = Jenkins.getInstance().getDescriptorList(target);
 
         Class<? extends Describable> k = findDescribableBySymbol(config, shortname, candidates);
         final Configurator configurator = Configurator.lookup(k);
-        if (configurator == null) throw new IllegalStateException("No configurator implementation to manage "+k);
+        if (configurator == null) throw new IllegalStateException("No configurator implementation to manage " + k);
         return (Describable) configurator.test(subconfig);
     }
 

@@ -222,14 +222,14 @@ public abstract class BaseConfigurator<T> extends Configurator<T> {
     protected void test(Mapping config, T instance) throws ConfiguratorException {
         final Set<Attribute> attributes = describe();
 
-        for (Attribute<T,Object> attribute : attributes) {
+        for (Attribute<T, Object> attribute : attributes) {
             final String name = attribute.getName();
             CNode sub = removeIgnoreCase(config, name);
             if (sub == null) {
                 for (String alias : attribute.aliases) {
                     sub = removeIgnoreCase(config, alias);
                     if (sub != null) {
-                        LOGGER.warning(sub.source() + ": '"+alias+"' is an obsolete attribute name, please use '" + name + "'");
+                        ObsoleteConfigurationMonitor.get().record(sub, "'" + alias + "' is an obsolete attribute name, please use '" + name + "'");
                         break;
                     }
                 }
@@ -241,14 +241,11 @@ public abstract class BaseConfigurator<T> extends Configurator<T> {
 
                 final Object valueToSet;
                 if (attribute.isMultiple()) {
-                    List<Object> values = new ArrayList<>();
                     for (CNode o : sub.asSequence()) {
-                        Object value = configurator.test(o);
-                        values.add(value);
+                        configurator.configure(o);
                     }
-                    valueToSet= values;
                 } else {
-                    valueToSet = configurator.test(sub);
+                    configurator.configure(sub);
                 }
 
 //                try {

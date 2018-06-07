@@ -71,7 +71,7 @@ public class GlobalMatrixAuthorizationStrategyConfigurator extends Configurator<
     public GlobalMatrixAuthorizationStrategy test(CNode config) throws ConfiguratorException {
         Mapping map = config.asMapping();
         Configurator<GroupPermissionDefinition> permissionConfigurator = Configurator.lookupOrFail(GroupPermissionDefinition.class);
-        Map<Permission,Set<String>> grantedPermissions = new HashMap<>();
+        Map<Permission, Set<String>> grantedPermissions = new HashMap<>();
         for (CNode entry : map.get("grantedPermissions").asSequence()) {
             GroupPermissionDefinition gpd = permissionConfigurator.test(entry);
             //We transform the linear list to a matrix (Where permission is the key instead)

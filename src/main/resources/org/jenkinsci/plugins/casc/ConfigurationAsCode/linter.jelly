@@ -11,8 +11,10 @@
      <f:form method="post" action="lint" name="lint">
       <textarea rows="24" style="width:100%">
       </textarea>
-      <f:submit name="validate" value="Validate"/>
-    </f:form>        
+      <f:bottomButtonBar>
+        <f:apply value="${%Validate}"/>
+      </f:bottomButtonBar>
+    </f:form>
   </div>
   </div>
   </div>

@@ -55,7 +55,8 @@ public class DescriptorConfigurator extends BaseConfigurator<Descriptor> impleme
 
     @Override
     public Descriptor test(CNode config) throws ConfiguratorException {
-        configure(config.asMapping(), descriptor);
+        test(config.asMapping(), descriptor);
+//        descriptor.save();
         return descriptor;
     }
 

@@ -266,18 +266,7 @@ public class PluginManagerConfigurator extends BaseConfigurator<PluginManager> i
             }
         }
 
-
-        Queue<PluginToInstall> plugins = new LinkedList<>();
-        final CNode required = map.get("required");
-        if (required != null) {
-            for (Map.Entry<String, CNode> entry : required.asMapping().entrySet()) {
-                plugins.add(new PluginToInstall(entry.getKey(), entry.getValue().asScalar().getValue()));
-            }
-        }
-
-        final PluginManager pluginManager = getTargetComponent();
-
-        return pluginManager;
+        return getTargetComponent();
     }
 
     @Override

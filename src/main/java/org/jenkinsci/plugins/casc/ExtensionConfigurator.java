@@ -79,15 +79,17 @@ public class ExtensionConfigurator<T> extends BaseConfigurator<T> {
                 if (config.containsKey(name)) {
                     final Class k = attribute.getType();
                     final Configurator configurator = Configurator.lookup(k);
-                    if (configurator == null) throw new IllegalStateException("No configurator implementation to manage "+ k);
-                    final CNode yaml = config.get(name);
-                    final Object value = configurator.test(yaml);
-                    try {
-                        logger.info("Setting " + o + '.' + name + " = " + (yaml.isSensitiveData() ? "****" : value));
-                        attribute.setValue(o, value);
-                    } catch (Exception e) {
-                        throw new ConfiguratorException(this, "Failed to set attribute " + attribute, e);
+                    if (configurator == null) {
+                        throw new IllegalStateException("No configurator implementation to manage " + k);
                     }
+                    final CNode yaml = config.get(name);
+                    configurator.test(yaml);
+//                    try {
+//                        logger.info("Setting " + o + '.' + name + " = " + (yaml.isSensitiveData() ? "****" : value));
+//                        attribute.setValue(o, value);
+//                    } catch (Exception e) {
+//                        throw new ConfiguratorException(this, "Failed to set attribute " + attribute, e);
+//                    }
                 }
             }
         }

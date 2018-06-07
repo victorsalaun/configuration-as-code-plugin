@@ -32,9 +32,12 @@
           <f:submit name="export" value="Export Configuration"/>
         </f:form>
 
-      <f:form method="post" action="lint" name="lint">
-        <f:submit name="lint" value="lint Configuration"/>
-      </f:form>
+<f:form>
+              <f:entry title="${%Yaml}">
+                  <f:textbox field="yaml" />
+                </f:entry>
+              <f:validateButton method="lint" title="Lint Configuration" progress="${%Linting...}"/>
+              </f:form>
     </j:choose>
 
 

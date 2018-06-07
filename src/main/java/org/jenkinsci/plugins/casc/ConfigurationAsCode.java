@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.model.ManagementLink;
+import hudson.util.FormApply;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.casc.model.CNode;
 import org.jenkinsci.plugins.casc.model.Mapping;
@@ -21,33 +22,18 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.composer.Composer;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.error.YAMLException;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.SequenceNode;
-import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.nodes.*;
 import org.yaml.snakeyaml.resolver.Resolver;
 import org.yaml.snakeyaml.serializer.Serializer;
 
 import javax.annotation.CheckForNull;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.io.File;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -465,8 +451,13 @@ public class ConfigurationAsCode extends ManagementLink {
             return;
         }
 
-        lint();
-        response.sendRedirect("");
+        try {
+            lint();
+        } catch (Exception e) {
+            throw e;
+        }
+        FormApply.success("").generateResponse(request, response,this);
+
     }
 
     public void lint() throws Exception {
@@ -525,46 +516,11 @@ public class ConfigurationAsCode extends ManagementLink {
         // Run configurators by order, consuming entries until all have found a matching configurator
         // configurators order is important so that org.jenkinsci.plugins.casc.plugins.PluginManagerConfigurator run
         // before any other, and can install plugins required by other configuration to successfully parse yaml data
-        /*for (RootElementConfigurator configurator : RootElementConfigurator.all()) {
-            final CNode config = configurator.describe(configurator.getTargetComponent());
-            final Iterator<Map.Entry<String, CNode>> it = entries.iterator();
-            while (it.hasNext()) {
-                Map.Entry<String, CNode> entry = it.next();
-                if (!entry.getKey().equalsIgnoreCase(configurator.getName())) {
-                    continue;
-                }
-                System.out.println("name: " + configurator.getName());
-                //configurator.configure(entry.getValue());
-                Mapping yamlMapping = entry.getValue().asMapping();
-                Set<String> yamlKeys = yamlMapping.keySet();
-
-                Mapping currentMapping = config != null ? config.asMapping() : new Mapping();
-                Set<String> currentKeys = currentMapping.keySet();
-
-                for (String key : yamlKeys) {
-                    if (!currentKeys.contains(key)) {
-                        throw new ConfiguratorException("Invalid configuration elements for type " + configurator.getClass() + " : " + key);
-                    }
-                }
-
-                it.remove();
-                break;
-            }
-        }
-
-        if (!entries.isEmpty()) {
-            final Map.Entry<String, CNode> next = entries.iterator().next();
-            throw new ConfiguratorException(format("No configurator for root element <%s>", next.getKey()));
-        }*/
-
-        // Run configurators by order, consuming entries until all have found a matching configurator
-        // configurators order is important so that org.jenkinsci.plugins.casc.plugins.PluginManagerConfigurator run
-        // before any other, and can install plugins required by other configuration to successfully parse yaml data
         for (RootElementConfigurator configurator : RootElementConfigurator.all()) {
             final Iterator<Map.Entry<String, CNode>> it = entries.iterator();
             while (it.hasNext()) {
                 Map.Entry<String, CNode> entry = it.next();
-                if (! entry.getKey().equalsIgnoreCase(configurator.getName())) {
+                if (!entry.getKey().equalsIgnoreCase(configurator.getName())) {
                     continue;
                 }
                 try {

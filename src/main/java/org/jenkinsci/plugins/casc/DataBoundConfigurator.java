@@ -176,12 +176,14 @@ public class DataBoundConfigurator<T> extends BaseConfigurator<T> {
                         final Type pt = parameters[i].getParameterizedType();
                         final Type k = pt != null ? pt : t;
                         final Configurator configurator = Configurator.lookup(k);
-                        if (configurator == null) throw new IllegalStateException("No configurator implementation to manage "+k);
+                        if (configurator == null) {
+                            throw new IllegalStateException("No configurator implementation to manage " + k);
+                        }
                         args[i] = configurator.test(value);
                     }
                     logger.info("Setting " + target + "." + names[i] + " = " + (value.isSensitiveData() ? "****" : value));
                 } else if (t.isPrimitive()) {
-                    args[i] = Defaults.defaultValue(t);
+                    args[i] = defaultValue(t);
                 }
             }
         }
@@ -207,22 +209,19 @@ public class DataBoundConfigurator<T> extends BaseConfigurator<T> {
             final Configurator lookup = Configurator.lookup(attribute.getType());
             if (config.containsKey(name)) {
                 final CNode yaml = config.get(name);
-                Object value;
                 if (attribute.isMultiple()) {
-                    List l = new ArrayList<>();
                     for (CNode o : yaml.asSequence()) {
-                        l.add(lookup.test(o));
+                        lookup.test(o);
                     }
-                    value = l;
                 } else {
-                    value = lookup.test(config.get(name));
+                    lookup.test(config.get(name));
                 }
-                try {
-                    logger.info("Setting " + object + '.' + name + " = " + (yaml.isSensitiveData() ? "****" : value));
-                    attribute.setValue(object, value);
-                } catch (Exception e) {
-                    throw new ConfiguratorException(this, "Failed to set attribute " + attribute, e);
-                }
+//                try {
+//                    logger.info("Setting " + object + '.' + name + " = " + (yaml.isSensitiveData() ? "****" : value));
+//                    attribute.setValue(object, value);
+//                } catch (Exception e) {
+//                    throw new ConfiguratorException(this, "Failed to set attribute " + attribute, e);
+//                }
             }
         }
 

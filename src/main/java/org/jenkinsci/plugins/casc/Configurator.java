@@ -18,19 +18,10 @@ import org.kohsuke.stapler.lang.Klass;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 
@@ -250,6 +241,13 @@ public abstract class Configurator<T> implements ExtensionPoint, ElementConfigur
      */
     @Nonnull
     public abstract T configure(CNode config) throws ConfiguratorException;
+
+    /**
+     * {@inheritDoc}
+     * @param config
+     */
+    @Nonnull
+    public abstract T test(CNode config) throws ConfiguratorException;
 
     /**
      * Describe a component as a Configuration Nodes {@link CNode} to be exported as yaml.

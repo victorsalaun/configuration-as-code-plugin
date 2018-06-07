@@ -62,16 +62,16 @@ public class ProjectMatrixAuthorizationStrategyConfigurator extends Configurator
         Mapping map = config.asMapping();
         Sequence o = map.get("grantedPermissions").asSequence();
         Configurator<GroupPermissionDefinition> permissionConfigurator = Configurator.lookupOrFail(GroupPermissionDefinition.class);
-        Map<Permission,Set<String>> grantedPermissions = new HashMap<>();
-        for(CNode entry : o) {
+        Map<Permission, Set<String>> grantedPermissions = new HashMap<>();
+        for (CNode entry : o) {
             GroupPermissionDefinition gpd = permissionConfigurator.test(entry);
             //We transform the linear list to a matrix (Where permission is the key instead)
             gpd.grantPermission(grantedPermissions);
         }
 
         ProjectMatrixAuthorizationStrategy gms = new ProjectMatrixAuthorizationStrategy();
-        for(Map.Entry<Permission,Set<String>> permission : grantedPermissions.entrySet()) {
-            for(String sid : permission.getValue()) {
+        for (Map.Entry<Permission, Set<String>> permission : grantedPermissions.entrySet()) {
+            for (String sid : permission.getValue()) {
                 gms.add(permission.getKey(), sid);
             }
         }
