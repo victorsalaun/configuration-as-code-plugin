@@ -41,16 +41,9 @@ public class CredentialsRootConfigurator extends BaseConfigurator<GlobalCredenti
     }
 
     @Override
-    public GlobalCredentialsConfiguration configure(CNode config) throws ConfiguratorException {
+    public GlobalCredentialsConfiguration configure(CNode config, boolean apply) throws ConfiguratorException {
         final GlobalCredentialsConfiguration target = getTargetComponent();
-        configure(config.asMapping(), target);
-        return target;
-    }
-
-    @Override
-    public GlobalCredentialsConfiguration test(CNode config) throws ConfiguratorException {
-        final GlobalCredentialsConfiguration target = getTargetComponent();
-        test(config.asMapping(), target);
+        configure(config.asMapping(), target, apply);
         return target;
     }
 

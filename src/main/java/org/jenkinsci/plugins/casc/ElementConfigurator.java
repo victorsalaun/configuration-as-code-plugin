@@ -62,21 +62,7 @@ public interface ElementConfigurator<T> {
      * @throws ConfiguratorException if something went wrong, depends on the concrete implementation
      */
     @Nonnull
-    T configure(CNode config) throws ConfiguratorException;
-
-    /**
-     * Configures/creates a Jenkins object based on a tree.
-     *
-     * @param config
-     *      Map/List/primitive objects (think YAML) that represents the configuration from which
-     *      a Jenkins object is configured.
-     * @return
-     *      Fully configured Jenkins object that results from this configuration.
-     *      if no new objects got created, but some existing objects may have been modified, return updated target object.
-     * @throws ConfiguratorException if something went wrong, depends on the concrete implementation
-     */
-    @Nonnull
-    T test(CNode config) throws ConfiguratorException;
+    T configure(CNode config, boolean apply) throws ConfiguratorException;
 
     /**
      * Describe a component as a Configuration Nodes {@link CNode} to be exported as yaml.

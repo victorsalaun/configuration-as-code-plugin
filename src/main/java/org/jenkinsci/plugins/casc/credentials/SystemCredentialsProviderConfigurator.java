@@ -28,17 +28,9 @@ public class SystemCredentialsProviderConfigurator extends BaseConfigurator<Syst
 
     @Nonnull
     @Override
-    public SystemCredentialsProvider configure(CNode config) throws ConfiguratorException {
+    public SystemCredentialsProvider configure(CNode config, boolean apply) throws ConfiguratorException {
         final SystemCredentialsProvider instance = SystemCredentialsProvider.getInstance();
-        configure(config.asMapping(), instance);
-        return instance;
-    }
-
-    @Nonnull
-    @Override
-    public SystemCredentialsProvider test(CNode config) throws ConfiguratorException {
-        final SystemCredentialsProvider instance = SystemCredentialsProvider.getInstance();
-        test(config.asMapping(), instance);
+        configure(config.asMapping(), instance, apply);
         return instance;
     }
 

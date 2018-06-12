@@ -173,7 +173,7 @@ public abstract class BaseConfigurator<T> extends Configurator<T> {
         return attribute;
     }
 
-    protected void configure(Mapping config, T instance) throws ConfiguratorException {
+    protected void configure(Mapping config, T instance, boolean apply) throws ConfiguratorException {
         final Set<Attribute> attributes = describe();
 
         for (Attribute<T,Object> attribute : attributes) {
@@ -197,63 +197,20 @@ public abstract class BaseConfigurator<T> extends Configurator<T> {
                 if (attribute.isMultiple()) {
                     List<Object> values = new ArrayList<>();
                     for (CNode o : sub.asSequence()) {
-                        Object value = configurator.configure(o);
+                        Object value = configurator.configure(o, apply);
                         values.add(value);
                     }
                     valueToSet= values;
                 } else {
-                    valueToSet = configurator.configure(sub);
+                    valueToSet = configurator.configure(sub, apply);
                 }
 
                 try {
                     LOGGER.info("Setting " + instance + '.' + name + " = " + (sub.isSensitiveData() ? "****" : valueToSet));
-                    attribute.setValue(instance, valueToSet);
+                    if (apply) attribute.setValue(instance, valueToSet);
                 } catch (Exception ex) {
                     throw new ConfiguratorException(configurator, "Failed to set attribute " + attribute, ex);
                 }
-            }
-        }
-        if (!config.isEmpty()) {
-            final String invalid = StringUtils.join(config.keySet(), ',');
-            throw new ConfiguratorException("Invalid configuration elements for type " + instance.getClass() + " : " + invalid);
-        }
-    }
-
-    protected void test(Mapping config, T instance) throws ConfiguratorException {
-        final Set<Attribute> attributes = describe();
-
-        for (Attribute<T, Object> attribute : attributes) {
-            final String name = attribute.getName();
-            CNode sub = removeIgnoreCase(config, name);
-            if (sub == null) {
-                for (String alias : attribute.aliases) {
-                    sub = removeIgnoreCase(config, alias);
-                    if (sub != null) {
-                        ObsoleteConfigurationMonitor.get().record(sub, "'" + alias + "' is an obsolete attribute name, please use '" + name + "'");
-                        break;
-                    }
-                }
-            }
-
-            if (sub != null) {
-                final Class k = attribute.getType();
-                final Configurator configurator = Configurator.lookupOrFail(k);
-
-                final Object valueToSet;
-                if (attribute.isMultiple()) {
-                    for (CNode o : sub.asSequence()) {
-                        configurator.configure(o);
-                    }
-                } else {
-                    configurator.configure(sub);
-                }
-
-//                try {
-//                    LOGGER.info("Setting " + instance + '.' + name + " = " + (sub.isSensitiveData() ? "****" : valueToSet));
-//                    attribute.setValue(instance, valueToSet);
-//                } catch (Exception ex) {
-//                    throw new ConfiguratorException(configurator, "Failed to set attribute " + attribute, ex);
-//                }
             }
         }
         if (!config.isEmpty()) {

@@ -40,7 +40,7 @@ public class DataBoundConfigurator<T> extends BaseConfigurator<T> {
     }
 
     @Override
-    public T configure(CNode c) throws ConfiguratorException {
+    public T configure(CNode c, boolean apply) throws ConfiguratorException {
 
         // c can be null for component with no-arg constructor and no extra property to be set
         Mapping config = (c != null ? c.asMapping() : Mapping.EMPTY);
@@ -68,7 +68,7 @@ public class DataBoundConfigurator<T> extends BaseConfigurator<T> {
 
                         final ArrayList<Object> list = new ArrayList<>();
                         for (CNode o : value.asSequence()) {
-                            list.add(lookup.configure(o));
+                            list.add(lookup.configure(o, apply));
                         }
                         args[i] = list;
 
@@ -77,7 +77,7 @@ public class DataBoundConfigurator<T> extends BaseConfigurator<T> {
                         final Type k = pt != null ? pt : t;
                         final Configurator configurator = Configurator.lookup(k);
                         if (configurator == null) throw new IllegalStateException("No configurator implementation to manage "+k);
-                        args[i] = configurator.configure(value);
+                        args[i] = configurator.configure(value, apply);
                     }
                     logger.info("Setting " + target + "." + names[i] + " = " + (value.isSensitiveData() ? "****" : value));
                 } else if (t.isPrimitive()) {
@@ -111,117 +111,18 @@ public class DataBoundConfigurator<T> extends BaseConfigurator<T> {
                 if (attribute.isMultiple()) {
                     List l = new ArrayList<>();
                     for (CNode o : yaml.asSequence()) {
-                        l.add(lookup.configure(o));
+                        l.add(lookup.configure(o, apply));
                     }
                     value = l;
                 } else {
-                    value = lookup.configure(config.get(name));
+                    value = lookup.configure(config.get(name), apply);
                 }
                 try {
                     logger.info("Setting " + object + '.' + name + " = " + (yaml.isSensitiveData() ? "****" : value));
-                    attribute.setValue(object, value);
+                    if (apply) attribute.setValue(object, value);
                 } catch (Exception e) {
                     throw new ConfiguratorException(this, "Failed to set attribute " + attribute, e);
                 }
-            }
-        }
-
-        for (Method method : target.getMethods()) {
-            if (method.getParameterCount() == 0 && method.getAnnotation(PostConstruct.class) != null) {
-                try {
-                    method.invoke(object, null);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new ConfiguratorException(this, "Failed to invoke configurator method " + method, e);
-                }
-            }
-        }
-
-        return (T) object;
-    }
-
-    @Override
-    public T test(CNode c) throws ConfiguratorException {
-
-        // c can be null for component with no-arg constructor and no extra property to be set
-        Mapping config = (c != null ? c.asMapping() : Mapping.EMPTY);
-
-        final Constructor constructor = getDataBoundConstructor();
-
-        final Parameter[] parameters = constructor.getParameters();
-        final String[] names = ClassDescriptor.loadParameterNames(constructor);
-        Object[] args = new Object[names.length];
-
-        if (parameters.length > 0) {
-            // Many jenkins components haven't been migrated to @DataBoundSetter vs @NotNull constructor parameters
-            // as a result it might be valid to reference a describable without parameters
-
-            for (int i = 0; i < names.length; i++) {
-                final CNode value = config.remove(names[i]);
-                if (value == null && parameters[i].getAnnotation(Nonnull.class) != null) {
-                    throw new ConfiguratorException(names[i] + " is required to configure " + target);
-                }
-                final Class t = parameters[i].getType();
-                if (value != null) {
-                    if (Collection.class.isAssignableFrom(t)) {
-                        final Type pt = parameters[i].getParameterizedType();
-                        final Configurator lookup = Configurator.lookup(pt);
-
-                        final ArrayList<Object> list = new ArrayList<>();
-                        for (CNode o : value.asSequence()) {
-                            list.add(lookup.test(o));
-                        }
-                        args[i] = list;
-
-                    } else {
-                        final Type pt = parameters[i].getParameterizedType();
-                        final Type k = pt != null ? pt : t;
-                        final Configurator configurator = Configurator.lookup(k);
-                        if (configurator == null) {
-                            throw new IllegalStateException("No configurator implementation to manage " + k);
-                        }
-                        args[i] = configurator.test(value);
-                    }
-                    logger.info("Setting " + target + "." + names[i] + " = " + (value.isSensitiveData() ? "****" : value));
-                } else if (t.isPrimitive()) {
-                    args[i] = defaultValue(t);
-                }
-            }
-        }
-
-        final Object object;
-        try {
-            object = constructor.newInstance(args);
-        } catch (IllegalArgumentException | InstantiationException | InvocationTargetException | IllegalAccessException ex) {
-            List<String> argumentTypes = new ArrayList<>(args.length);
-            for (Object arg : args) {
-                argumentTypes.add(arg != null ? arg.getClass().getName() : "null");
-            }
-            throw new ConfiguratorException(this,
-                    "Failed to construct instance of " + target +
-                            ".\n Constructor: " + constructor.toString() +
-                            ".\n Arguments: " + argumentTypes, ex);
-        }
-
-        final Set<Attribute> attributes = describe();
-
-        for (Attribute attribute : attributes) {
-            final String name = attribute.getName();
-            final Configurator lookup = Configurator.lookup(attribute.getType());
-            if (config.containsKey(name)) {
-                final CNode yaml = config.get(name);
-                if (attribute.isMultiple()) {
-                    for (CNode o : yaml.asSequence()) {
-                        lookup.test(o);
-                    }
-                } else {
-                    lookup.test(config.get(name));
-                }
-//                try {
-//                    logger.info("Setting " + object + '.' + name + " = " + (yaml.isSensitiveData() ? "****" : value));
-//                    attribute.setValue(object, value);
-//                } catch (Exception e) {
-//                    throw new ConfiguratorException(this, "Failed to set attribute " + attribute, e);
-//                }
             }
         }
 

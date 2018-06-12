@@ -38,22 +38,7 @@ public class SeedJobConfigurator implements RootElementConfigurator<List<Generat
     }
 
     @Override
-    public List<GeneratedItems> configure(CNode config) throws ConfiguratorException {
-        JenkinsJobManagement mng = new JenkinsJobManagement(System.out, new EnvVars(), null, null, LookupStrategy.JENKINS_ROOT);
-        final Sequence scripts = config.asSequence();
-        List<GeneratedItems> generated = new ArrayList<>();
-        for (CNode script : scripts) {
-            try {
-                generated.add(new JenkinsDslScriptLoader(mng).runScript(script.asScalar().getValue()));
-            } catch (Exception ex) {
-                throw new ConfiguratorException(this, "Failed to execute script with hash " + script.hashCode(), ex);
-            }
-        }
-        return generated;
-    }
-
-    @Override
-    public List<GeneratedItems> test(CNode config) throws ConfiguratorException {
+    public List<GeneratedItems> configure(CNode config, boolean apply) throws ConfiguratorException {
         JenkinsJobManagement mng = new JenkinsJobManagement(System.out, new EnvVars(), null, null, LookupStrategy.JENKINS_ROOT);
         final Sequence scripts = config.asSequence();
         List<GeneratedItems> generated = new ArrayList<>();

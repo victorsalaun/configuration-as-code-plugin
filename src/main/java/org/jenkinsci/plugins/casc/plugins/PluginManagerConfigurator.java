@@ -62,7 +62,7 @@ public class PluginManagerConfigurator extends BaseConfigurator<PluginManager> i
     }
 
     @Override
-    public PluginManager configure(CNode config) throws ConfiguratorException {
+    public PluginManager configure(CNode config, boolean apply) throws ConfiguratorException {
         Mapping map = config.asMapping();
         final Jenkins jenkins = Jenkins.getInstance();
 
@@ -70,7 +70,7 @@ public class PluginManagerConfigurator extends BaseConfigurator<PluginManager> i
         if (proxy != null) {
             Configurator<ProxyConfiguration> pc = Configurator.lookup(ProxyConfiguration.class);
             if (pc == null) throw new ConfiguratorException("ProxyConfiguration not well registered");
-            ProxyConfiguration pcc = pc.configure(proxy);
+            ProxyConfiguration pcc = pc.configure(proxy, apply);
             jenkins.proxy = pcc;
         }
 
@@ -80,7 +80,7 @@ public class PluginManagerConfigurator extends BaseConfigurator<PluginManager> i
             Configurator<UpdateSite> usc = Configurator.lookup(UpdateSite.class);
             List<UpdateSite> updateSites = new ArrayList<>();
             for (CNode data : sites.asSequence()) {
-                UpdateSite in = usc.configure(data);
+                UpdateSite in = usc.configure(data, apply);
                 if (in.isDue()) {
                     in.updateDirectly(DownloadService.signatureCheck);
                 }
@@ -231,42 +231,6 @@ public class PluginManagerConfigurator extends BaseConfigurator<PluginManager> i
             throw new ConfiguratorException("failed to save Jenkins configuration", e);
         }
         return pluginManager;
-    }
-
-    @Override
-    public PluginManager test(CNode config) throws ConfiguratorException {
-        Mapping map = config.asMapping();
-        final Jenkins jenkins = Jenkins.getInstance();
-
-        final CNode proxy = map.get("proxy");
-        if (proxy != null) {
-            Configurator<ProxyConfiguration> pc = Configurator.lookup(ProxyConfiguration.class);
-            if (pc == null) throw new ConfiguratorException("ProxyConfiguration not well registered");
-            ProxyConfiguration pcc = pc.test(proxy);
-            jenkins.proxy = pcc;
-        }
-
-        final CNode sites = map.get("sites");
-        final UpdateCenter updateCenter = jenkins.getUpdateCenter();
-        if (sites != null) {
-            Configurator<UpdateSite> usc = Configurator.lookup(UpdateSite.class);
-            List<UpdateSite> updateSites = new ArrayList<>();
-            for (CNode data : sites.asSequence()) {
-                UpdateSite in = usc.test(data);
-                if (in.isDue()) {
-                    in.updateDirectly(DownloadService.signatureCheck);
-                }
-                updateSites.add(in);
-            }
-
-            try {
-                updateCenter.getSites().replaceBy(updateSites);
-            } catch (IOException e) {
-                throw new ConfiguratorException("failed to reconfigure updateCenter.sites", e);
-            }
-        }
-
-        return getTargetComponent();
     }
 
     @Override

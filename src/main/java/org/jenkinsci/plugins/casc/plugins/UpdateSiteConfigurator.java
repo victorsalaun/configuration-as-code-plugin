@@ -8,7 +8,6 @@ import org.jenkinsci.plugins.casc.model.CNode;
 import org.jenkinsci.plugins.casc.model.Mapping;
 
 import javax.annotation.CheckForNull;
-import java.util.Map;
 
 /**
  * TODO would  not be required if UpdateSite had a DataBoundConstructor
@@ -23,13 +22,7 @@ public class UpdateSiteConfigurator extends BaseConfigurator<UpdateSite> {
     }
 
     @Override
-    public UpdateSite configure(CNode config) throws ConfiguratorException {
-        Mapping map = config.asMapping();
-        return new UpdateSite(map.getScalarValue("id"), map.getScalarValue("url"));
-    }
-
-    @Override
-    public UpdateSite test(CNode config) throws ConfiguratorException {
+    public UpdateSite configure(CNode config, boolean apply) throws ConfiguratorException {
         Mapping map = config.asMapping();
         return new UpdateSite(map.getScalarValue("id"), map.getScalarValue("url"));
     }

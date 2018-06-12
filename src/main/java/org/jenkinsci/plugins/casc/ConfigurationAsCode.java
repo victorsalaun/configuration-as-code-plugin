@@ -383,7 +383,7 @@ public class ConfigurationAsCode extends ManagementLink {
                     continue;
                 }
                 try {
-                    configurator.configure(entry.getValue());
+                    configurator.configure(entry.getValue(), true);
                     it.remove();
                     break;
                 } catch (ConfiguratorException e) {
@@ -524,7 +524,7 @@ public class ConfigurationAsCode extends ManagementLink {
                     continue;
                 }
                 try {
-                    configurator.test(entry.getValue());
+                    configurator.configure(entry.getValue(), false);
                     it.remove();
                     break;
                 } catch (ConfiguratorException e) {

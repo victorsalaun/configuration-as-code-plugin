@@ -47,14 +47,8 @@ public class GlobalConfigurationCategoryConfigurator extends BaseConfigurator<Gl
     }
 
     @Override
-    public GlobalConfigurationCategory configure(CNode config) throws ConfiguratorException {
-        configure(config.asMapping(), category);
-        return category;
-    }
-
-    @Override
-    public GlobalConfigurationCategory test(CNode config) throws ConfiguratorException {
-        test(config.asMapping(), category);
+    public GlobalConfigurationCategory configure(CNode config, boolean apply) throws ConfiguratorException {
+        configure(config.asMapping(), category, apply);
         return category;
     }
 
